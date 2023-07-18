@@ -1,6 +1,21 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+function getWeatherClass(wmoCode) {
+  const classes = new Map([
+    [[0], "sunny"],
+    [[1, 2], "partlycloudy"],
+    [[3], "cloudy"],
+    [[45, 48, 51, 56, 61, 66, 80, 53, 55, 63, 65, 57, 67, 81, 82], "rainy"],
+    [[71, 73, 75, 77, 85, 86], "snowy"],
+    [[95, 96, 99], "stormy"],
+  ]);
+
+  const arr = [...classes.keys()].find((key) => key.includes(wmoCode));
+  if (!arr) return "unknown";
+  return classes.get(arr);
+}
+
 function getWeatherIcon(wmoCode) {
   const icons = new Map([
     [[0], "☀️"],
@@ -76,7 +91,14 @@ class App extends React.Component {
           "Failed to fetch weather. Please, reload the page or try again later.",
         );
       const weatherData = await weatherRes.json();
-      this.setState({ weather: weatherData.daily });
+      this.setState({ weather: weatherData.daily }, () => {
+        if (this.state.weather && this.state.weather.weathercode) {
+          const newWeatherClass = getWeatherClass(
+            this.state.weather.weathercode[0],
+          );
+          document.body.classList.add(newWeatherClass);
+        }
+      });
     } catch (err) {
       this.setState({ errorFound: true, errorMessage: err.message });
     } finally {
@@ -94,6 +116,22 @@ class App extends React.Component {
     if (this.state.location !== prevState.location) {
       this.fetchWeather();
       localStorage.setItem("location", this.state.location);
+    }
+
+    if (
+      this.state.weather.weathercode &&
+      prevState.weather.weathercode &&
+      this.state.weather.weathercode[0] !== prevState.weather.weathercode[0]
+    ) {
+      const previousWeatherClass = getWeatherClass(
+        prevState.weather.weathercode[0],
+      );
+      document.body.classList.remove(previousWeatherClass);
+
+      const newWeatherClass = getWeatherClass(
+        this.state.weather.weathercode[0],
+      );
+      document.body.classList.add(newWeatherClass);
     }
   }
 
