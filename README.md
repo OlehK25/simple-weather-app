@@ -4,7 +4,7 @@ Written using classes.
 ## ℹ️️ About
 
 A simple React app that offers you to find out the weather for a week for your city.
-Visit the live app [here]()
+Visit the live app [here](https://classy-weather-app.netlify.app/)
 
 ## 🗒️ Technology Stack
 
